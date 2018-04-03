@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import Geocode from "react-geocode";
 
-import { getUserLocation, fetchLocation } from '../actions/index';
+
+import { getUserLocation, fetchLocation, getInputLocation } from '../actions/index';
 import { Link } from 'react-router-dom';
 
 import StyledGrid from '../components/styled/StyledGrid';
@@ -12,6 +14,7 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 
 class MainPage extends Component {
+  
 
   componentDidMount() {
     if (navigator.geolocation) {
@@ -20,7 +23,18 @@ class MainPage extends Component {
   }
 
   handleChange = (e) => {
-    this.props.getUserLocation(e.target.value);
+    this.props.getInputLocation(e.target.value);
+    Geocode.setApiKey("AIzaSyA06nlgcoEtxl0TMQeh0Sm4DQjZh6gV_mA");
+    Geocode.fromLatLng(e.target.value).then(
+      response => {
+        const address = response.results[0].formatted_address;
+        console.log(address);
+      },
+      error => {
+        console.error(error);
+      }
+    );
+    this.props.getInputLocation(e.target.value);
   }
 
   startNewReport = () => { }
@@ -28,9 +42,10 @@ class MainPage extends Component {
   viewReports = () => { }
 
   render() {
-    const { loc } = this.props;
+    //const { loc } = this.props;
+    const { userInput } = this.props;
 
-    const location = loc && loc.lat && loc.lng ? `${loc.lat} ${loc.lng}` : 'Loading location...';
+    //const location = loc && loc.lat && loc.lng ? `${loc.lat} ${loc.lng}` : this.props.inputValue;
 
     return (
       <div className="App">
@@ -38,8 +53,8 @@ class MainPage extends Component {
           <StyledRow>
             <StyledCol xs={12} lg={12}>
               <Input
-                inputValue={location}
-                handleChange={this.handleChange}
+                inputValue={userInput} 
+                handleChange={e=>this.handleChange(e)}
               />
             </StyledCol>
           </StyledRow>
@@ -75,6 +90,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
   getUserLocation,
   fetchLocation,
+  getInputLocation
 };
 
 

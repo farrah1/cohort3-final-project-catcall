@@ -2,6 +2,7 @@ import ApiService from '../shared/services/api-service';
 
 export const ACTION_TYPES = {
     userLocation: 'USER_LOCATION',
+    getInputLocation: 'USER_INPUT_LOCATION',
     getLocationStart: 'GET_LOCATION_START',
     getLocationSuccess: 'GET_LOCATION_SUCCESS',
     getLocationError: 'GET_LOCATION_ERROR',
@@ -17,6 +18,15 @@ export const getUserLocation = (latitude, longitude) => {
         payload: {
             latitude,
             longitude
+        },
+    }
+}
+
+export const getInputLocation = (address) => {
+    return {
+        type: ACTION_TYPES.getInputLocation,
+        payload: {
+            address
         },
     }
 }

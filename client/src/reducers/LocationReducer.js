@@ -5,7 +5,7 @@ const DEFAULT_STATE = {
         lat: 43.653226,
         lng: -79.383184
     },
-    userInput: {}
+    userInput: "Loading location..."
 }
 
 export const locationReducer = (state = DEFAULT_STATE, { type, payload }) => {
@@ -33,6 +33,11 @@ export const locationReducer = (state = DEFAULT_STATE, { type, payload }) => {
                     lat: payload.latitude,
                     lng: payload.longitude,
                 }
+            }
+        case ACTION_TYPES.getInputLocation:
+            return {
+                ...state,
+                userInput: payload,
             }
         default:
             return state
