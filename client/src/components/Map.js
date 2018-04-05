@@ -1,25 +1,74 @@
 import React, { Component } from 'react';
-import {GoogleApiWrapper} from 'google-maps-react';
 import ReactDOM from 'react-dom'
 
 class Map extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mapLoaded: false
+    };
+  }
+
+  getGoogleMaps() {
+    const google = window.google;
+
+    if(google) {
+      return new Promise((resolve) => resolve(google))
+    }
+    debugger;
+    // If we haven't already defined the promise, define it
+    if (!this.googleMapsPromise) {
+      this.googleMapsPromise = new Promise((resolve) => {
+        // Add a global handler for when the API finishes loading
+        window.resolveGoogleMapsPromise = () => {
+          // Resolve the promise
+          resolve(google);
+
+          // Tidy up
+          delete window.resolveGoogleMapsPromise;
+        };
+
+        // Load the Google Maps API
+        const script = document.createElement("script");
+        const API = 'AIzaSyA06nlgcoEtxl0TMQeh0Sm4DQjZh6gV_mA';
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${API}&callback=resolveGoogleMapsPromise`;
+        script.async = true;
+        document.body.appendChild(script);
+      });
+    }
+
+    // Return a promise for the Google Maps API
+    return this.googleMapsPromise;
+  }
+
+  componentWillMount() {
+    // Start Google Maps API loading since we know we'll soon need it
+    this.getGoogleMaps();
+  }
+
+  componentDidMount() {
+    // Once the Google Maps API has finished loading, initialize the map
+    this.getGoogleMaps().then(() => {
+      this.loadMap();
+    });
+  }
 
   componentDidUpdate() {
     this.loadMap(); // call loadMap function to load the google map
   }
 
   loadMap() {
-    if (this.props && this.props.google) { // checks to make sure that props have been passed
-      const { google } = this.props; // sets props equal to google
-      const maps = google.maps; // sets maps to google maps props
-
+    if (this.props && window.google) { // checks to make sure that props have been passed
+      // const { google } = this.props; // sets props equal to google
+      const google = window.google;
+      const maps = window.google.maps; // sets maps to google maps props
       const mapRef = this.refs.map; // looks for HTML div ref 'map'. Returned in render below.
       const node = ReactDOM.findDOMNode(mapRef); // finds the 'map' div in the React DOM, names it node
-
       const locat = new google.maps.LatLng(
         this.props.location.lat,
-        this.props.location.lng);
-
+        this.props.location.lng
+      );
+      let marker;
       // TH: Style implemented is just a showing of how ic could be accomplished. Because it relies on its own properties, rather than CSS,
       // I don't believe Bootstrap + Styled-Components would apply here
       // styles can be better generated through https://mapstyle.withgoogle.com/ and have "styles" property imported here to replace 
@@ -50,29 +99,34 @@ class Map extends Component {
         ]
       })
 
-      this.map = new maps.Map(node, mapConfig); // creates a new Google map on the specified node (ref='map') with the specified configuration set above.
-
-        const marker = new google.maps.Marker({ // creates a new Google maps Marker object.
+      if (!this.state.mapLoaded){ // this prevents the map from reloading every time something updates
+        this.map = new maps.Map(node, mapConfig);  
+        maps.event.addListener(this.map, 'idle', () => {
+          this.setState({ mapLoaded: true });
+        });
+        marker = new maps.Marker({ 
           position: {lat: locat.lat(), lng: locat.lng()}, 
-          map: this.map, // sets markers to appear on the map we just created on line 35
-          title: "Home", //TODO: update this title 
+          map: this.map, 
           draggable: true 
         });
+      }
 
+      if (marker){
         marker.addListener('dragend', () => {
-            let position = marker.getPosition()
-            let latitude = position.lat()
-            let longitude = position.lng()
-            this.props.updatePinLocation(latitude, longitude);
-        });        
+          let position = marker.getPosition()
+          let latitude = position.lat()
+          let longitude = position.lng()
+          this.props.updatePinLocation(latitude, longitude);
+        });
+      }    
     }
   }
 
   render() {
     const style =
       {
-        width: '90vw', //TODO: update these
-        height: '75vh'
+        width: '100vw', //TODO: update these
+        height: '70vh'
       }
 
     return ( // in our return function you must return a div with ref='map' and style.
@@ -81,8 +135,6 @@ class Map extends Component {
       </div>
     )
   }
-}
+};
 
-export default GoogleApiWrapper({
-  apiKey: ('AIzaSyA06nlgcoEtxl0TMQeh0Sm4DQjZh6gV_mA')
-})(Map)
+export default Map;

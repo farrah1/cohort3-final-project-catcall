@@ -2,6 +2,7 @@ import ApiService from '../shared/services/api-service';
 
 export const ACTION_TYPES = {
     userLocation: 'USER_LOCATION',
+    getUserInput: 'GET_USER_INPUT',
     getInputLocation: 'USER_INPUT_LOCATION',
     getLocationStart: 'GET_LOCATION_START',
     getLocationSuccess: 'GET_LOCATION_SUCCESS',
@@ -9,16 +10,22 @@ export const ACTION_TYPES = {
     updatePinLocation: 'USER_LOCATION',
     updateRating: 'UPDATE_RATING',
     handleSubmitReport: 'HANDLE_SUBMIT_REPORT',
+    getUserReports: 'GET_USER_REPORTS',
 };
 
 // Action for the user input
-export const getUserLocation = (latitude, longitude) => {
+export const getUserLocation = (location) => {
     return {
         type: ACTION_TYPES.userLocation,
-        payload: {
-            latitude,
-            longitude
-        },
+        payload: location,
+    }
+}
+
+// Action for the user input
+export const getUserInput = (address) => {
+    return {
+        type: ACTION_TYPES.getUserInput,
+        payload: address,
     }
 }
 
@@ -91,5 +98,23 @@ export const handleSubmitReport = () => {
             .catch(error => {
                 console.error(error)
             })
+    }
+}
+
+// // Action Thunk (copy) for getting user reports
+export const getUserReports = () => {
+    return (dispatch) => {
+        ApiService.get('/')
+        .then(response => {
+            
+            return dispatch({
+                type: ACTION_TYPES.getUserReports,
+                payload: response.data,
+            });
+            
+        })
+        .catch(error => {
+            console.error(error)
+        });
     }
 }

@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Geocode from "react-geocode";
 
-
-import { getUserLocation, fetchLocation, getInputLocation } from '../actions/index';
+import { getUserLocation, fetchLocation } from '../actions/index';
 import { Link } from 'react-router-dom';
 
 import StyledGrid from '../components/styled/StyledGrid';
 import StyledRow from '../components/styled/StyledRow';
 import StyledCol from '../components/styled/StyledCol';
-import Input from '../components/Input';
+//import Input from '../components/Input';
+import SimpleForm from '../components/Searchbar';
 import Button from '../components/Button';
+import NavBar from '../components/NavBar';
 
 class MainPage extends Component {
-  
 
   componentDidMount() {
     if (navigator.geolocation) {
@@ -22,20 +21,9 @@ class MainPage extends Component {
     }
   }
 
-  handleChange = (e) => {
-    this.props.getInputLocation(e.target.value);
-    Geocode.setApiKey("AIzaSyA06nlgcoEtxl0TMQeh0Sm4DQjZh6gV_mA");
-    Geocode.fromLatLng(e.target.value).then(
-      response => {
-        const address = response.results[0].formatted_address;
-        console.log(address);
-      },
-      error => {
-        console.error(error);
-      }
-    );
-    this.props.getInputLocation(e.target.value);
-  }
+  // handleChange = (e) => {
+  //   this.props.getUserLocation(e.target.value);
+  // }
 
   startNewReport = () => { }
 
@@ -43,19 +31,17 @@ class MainPage extends Component {
 
   render() {
     //const { loc } = this.props;
-    const { userInput } = this.props;
+    //const { userInput } = this.props;
 
     //const location = loc && loc.lat && loc.lng ? `${loc.lat} ${loc.lng}` : this.props.inputValue;
 
     return (
       <div className="App">
+        <NavBar/>
         <StyledGrid>
           <StyledRow>
             <StyledCol xs={12} lg={12}>
-              <Input
-                inputValue={userInput} 
-                handleChange={e=>this.handleChange(e)}
-              />
+            <SimpleForm/>
             </StyledCol>
           </StyledRow>
           <StyledRow>
@@ -89,8 +75,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = {
   getUserLocation,
-  fetchLocation,
-  getInputLocation
+  fetchLocation
 };
 
 
